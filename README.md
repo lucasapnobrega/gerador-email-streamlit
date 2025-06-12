@@ -23,12 +23,22 @@ Uma ferramenta web desenvolvida com **Python**, **Streamlit** e **Google Gemini 
    cd email_consultant_streamlit
    ```
 
-2. **Instale as dependências**
+2. Criar ambiente virtual
+   ```bash
+   python -m venv streamlit_env
+   ```
+
+3. Ativar ambiente virtual
+   ```bash
+   streamlit_env\Scripts\activate
+   ```
+
+4. **Instale as dependências**
    ```bash
    pip install -r requirements.txt
    ```
 
-3. **Obtenha sua chave da API Gemini**
+5. **Obtenha sua chave da API Gemini**
    - Acesse: https://makersuite.google.com/app/apikey
    - Crie uma conta Google se necessário
    - Gere uma nova chave da API
@@ -46,8 +56,10 @@ Uma ferramenta web desenvolvida com **Python**, **Streamlit** e **Google Gemini 
    - Ou acesse manualmente o endereço
 
 3. **Configure a API**
-   - Na barra lateral, insira sua chave da API Gemini
-   - Aguarde a confirmação de configuração
+   - Crie um arquivo `.env` na raiz do projeto:
+   ```
+   GEMINI_API_KEY=sua_chave_aqui
+   ```
 
 4. **Use a ferramenta**
    - Digite seu rascunho de e-mail
@@ -129,5 +141,5 @@ Para problemas ou sugestões:
 
 ---
 
-**Nota**: Esta ferramenta requer uma chave da API do Google Gemini AI para funcionar. A API pode ter custos associados dependendo do uso.
+**Nota**: Esta ferramenta requer uma chave da API do Google Gemini AI para funcionar.
 

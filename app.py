@@ -69,7 +69,6 @@ def extrair_resposta_gemini(texto_resposta):
     except Exception as erro:
         return texto_resposta, f"Erro ao interpretar resposta: {str(erro)}"
 
-# Interface
 st.markdown("<h1 style='text-align: center;'>📧 Consultor de E-mails Profissionais</h1>", unsafe_allow_html=True)
 st.markdown("---")
 
@@ -126,7 +125,6 @@ with col2:
 
                 except Exception as erro:
                     st.error(f"❌ Erro ao processar: {str(erro)}")
-                    st.info("💡 Verifique se sua chave da API está correta e tente novamente.")
 
 st.markdown("---")
 st.markdown(
