@@ -11,62 +11,6 @@ Uma ferramenta web desenvolvida com **Python**, **Streamlit** e **Google Gemini 
 - **Sugestões detalhadas**: Explica todas as melhorias aplicadas
 - **Interface responsiva**: Funciona bem em desktop e mobile
 
-## 📋 Pré-requisitos
-
-- Python 3.7 ou superior
-- Chave da API do Google Gemini AI
-
-## 🔧 Instalação
-
-1. **Clone ou extraia o projeto**
-   ```bash
-   cd email_consultant_streamlit
-   ```
-
-2. Criar ambiente virtual
-   ```bash
-   python -m venv streamlit_env
-   ```
-
-3. Ativar ambiente virtual
-   ```bash
-   streamlit_env\Scripts\activate
-   ```
-
-4. **Instale as dependências**
-   ```bash
-   pip install -r requirements.txt
-   ```
-
-5. **Obtenha sua chave da API Gemini**
-   - Acesse: https://makersuite.google.com/app/apikey
-   - Crie uma conta Google se necessário
-   - Gere uma nova chave da API
-   - Guarde a chave para usar na aplicação
-
-## 🚀 Como usar
-
-1. **Execute a aplicação**
-   ```bash
-   streamlit run app.py
-   ```
-
-2. **Acesse no navegador**
-   - A aplicação abrirá automaticamente em `http://localhost:8501`
-   - Ou acesse manualmente o endereço
-
-3. **Configure a API**
-   - Crie um arquivo `.env` na raiz do projeto:
-   ```
-   GEMINI_API_KEY=sua_chave_aqui
-   ```
-
-4. **Use a ferramenta**
-   - Digite seu rascunho de e-mail
-   - Escolha o tom desejado (formal, amigável, assertivo)
-   - Clique em "Revisar e Aperfeiçoar"
-   - Veja o resultado e as sugestões!
-
 ## 📁 Estrutura do projeto
 
 ```
@@ -97,19 +41,6 @@ Você poderia me enviar o relatório? Agradeço antecipadamente, pois preciso de
 
 Atenciosamente,
 ```
-
-## 🛠️ Personalização
-
-Você pode personalizar os prompts da IA editando as funções no arquivo `app.py`:
-
-- `get_email_improvement_prompt()`: Modifica as instruções para a IA
-- `tone_instructions`: Ajusta as definições de cada tom
-
-## 🔒 Segurança
-
-- Sua chave da API é mantida apenas na sessão local
-- Nenhuma informação é armazenada permanentemente
-- Os dados são processados diretamente pela API do Google
 
 ## 🐛 Solução de problemas
 

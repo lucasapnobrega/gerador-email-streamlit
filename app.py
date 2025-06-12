@@ -44,8 +44,8 @@ def gerar_prompt_melhoria_email(rascunho, tom):
 
 def processar_email_com_gemini(rascunho, tom):
     try:
-        chave_api = os.getenv("GEMINI_API_KEY")
-        genai.configure(api_key=chave_api)
+        api_key = st.secrets["API_KEY"]
+        genai.configure(api_key=api_key)
         modelo = genai.GenerativeModel('gemini-1.5-flash')
 
         prompt = gerar_prompt_melhoria_email(rascunho, tom)
