@@ -14,6 +14,9 @@ st.set_page_config(
     layout="wide"
 )
 
+st.markdown("<h1 style='text-align: center;'>📧 Consultor de E-mails Profissionais</h1>", unsafe_allow_html=True)
+st.markdown("---")
+
 def gerar_prompt_melhoria_email(rascunho, tom, idioma):    
     instrucoes_tom = {
         "formal": "Use linguagem formal, tratamento respeitoso, evite contrações e gírias. Adicione cumprimentos e fechamentos apropriados para contexto corporativo.",
@@ -52,6 +55,37 @@ def gerar_prompt_melhoria_email(rascunho, tom, idioma):
     """
     return prompt
 
+def gerar_prompt_por_objetivo(objetivo, tom, idioma):
+    instrucoes_tom = {
+        "formal": "Use linguagem formal e apropriada para o ambiente corporativo.",
+        "amigável": "Use linguagem acessível e gentil, mantendo o profissionalismo.",
+        "assertivo": "Use linguagem objetiva e confiante, sem rodeios."
+    }
+
+    instrucoes_idioma = {
+        "português": "Escreva todo o e-mail em português.",
+        "inglês": "Write the entire email in English.",
+        "espanhol": "Escribe todo el correo en español, sin usar portugués ni inglés."
+    }
+
+    prompt = f"""
+    Você é um especialista em comunicação por e-mail. Crie um e-mail profissional com base no seguinte objetivo descrito pelo usuário:
+
+    OBJETIVO:
+    {objetivo}
+
+    INSTRUÇÕES:
+    - Siga o tom {tom}: {instrucoes_tom[tom]}
+    - {instrucoes_idioma[idioma]}
+    - Inclua uma saudação e uma despedida adequadas.
+    - Mantenha o texto claro, conciso e bem estruturado.
+
+    FORMATO DA RESPOSTA:
+    **E-MAIL GERADO:**
+    [Escreva aqui o e-mail gerado]
+    """
+    return prompt
+
 def processar_email_com_gemini(rascunho, tom, idioma):
     try:
         api_key = st.secrets["API_KEY"]
@@ -87,9 +121,6 @@ def extrair_resposta_gemini(texto_resposta):
     except Exception as erro:
         return texto_resposta, f"Erro ao interpretar resposta: {str(erro)}"
 
-st.markdown("<h1 style='text-align: center;'>📧 Consultor de E-mails Profissionais</h1>", unsafe_allow_html=True)
-st.markdown("---")
-
 email_final = ""
 
 def gerar_pdf(texto):
@@ -106,15 +137,25 @@ def gerar_pdf(texto):
 
     return pdf_bytes
 
+aba = st.radio("Escolha o modo:", ["✏️ Melhorar rascunho", "🧠 Gerar por objetivo"], horizontal=True)
+
 col1, col2 = st.columns([1, 1])
 
 with col1:
-    st.markdown("### 📝 Seu Rascunho")
-    rascunho_email = st.text_area(
-        "Digite seu rascunho de e-mail:",
-        height=200,
-        placeholder="Cole ou digite seu rascunho de e-mail aqui..."
-    )
+    if aba == "✏️ Melhorar rascunho":
+        st.markdown("### 📝 Seu Rascunho")
+        rascunho_email = st.text_area(
+            "Digite seu rascunho de e-mail:", 
+            height=200, 
+            placeholder="Cole ou digite seu rascunho de email aqui..."
+        )
+    else:
+        st.markdown("### 🎯 Objetivo do E-mail")
+        objetivo_email = st.text_area(
+            "Descreva o objetivo ou palavras-chave:", 
+            height=200, 
+            placeholder="Cole ou digite seu objetivo aqui..."
+        )
 
     tom = st.selectbox(
         "Escolha o tom:",
@@ -143,54 +184,65 @@ with col1:
     )
 
 with col2:
-    st.markdown("### Resultado")
+    st.markdown("### 📬 Resultado")
 
-    if not rascunho_email.strip():
-        st.info("👈 Digite seu rascunho de e-mail para ver o resultado")
-    else:
-        if botao_processar:
-            with st.spinner("Processando seu texto..."):
+    if aba == "✏️ Melhorar rascunho":
+        if not rascunho_email.strip():
+            st.info("👈 Digite seu rascunho de e-mail para ver o resultado")
+        elif botao_processar:
+            with st.spinner("Gerando e-mail..."):
                 try:
                     resposta = processar_email_com_gemini(rascunho_email, tom, idioma)
                     email_final, sugestoes = extrair_resposta_gemini(resposta)
-
                     st.session_state['email_final'] = email_final
                     st.session_state['sugestoes'] = sugestoes
-
                     st.success("✅ E-mail processado com sucesso!")
-
                 except Exception as erro:
                     st.error(f"❌ Erro ao processar: {str(erro)}")
+    else:
+        if not objetivo_email.strip():
+            st.info("👈 Descreva o objetivo do e-mail para ver o resultado")
+        elif botao_processar:
+            with st.spinner("Gerando e-mail..."):
+                try:
+                    api_key = st.secrets["API_KEY"]
+                    genai.configure(api_key=api_key)
+                    modelo = genai.GenerativeModel('gemini-1.5-flash')
 
-        if 'email_final' in st.session_state and st.session_state['email_final']:
-                st.markdown("#### 📧 E-mail Revisado:")
-                st.text_area(
-                    "Resultado:",
-                    value=st.session_state['email_final'],
-                    height=350,
-                    disabled=True
-                )
+                    prompt = gerar_prompt_por_objetivo(objetivo_email, tom, idioma)
+                    resposta = modelo.generate_content(prompt)
+                    texto = resposta.text
+                    email_final = texto.split("**E-MAIL GERADO:**")[-1].strip()
+                    st.session_state['email_final'] = email_final
+                    st.session_state['sugestoes'] = "ℹ️ Gerado diretamente a partir do objetivo informado."
+                    st.success("✅ E-mail gerado com sucesso!")
+                except Exception as erro:
+                    st.error(f"❌ Erro ao gerar: {str(erro)}")
 
-                st.markdown("#### 💡 Sugestões de Melhoria:")
-                st.markdown(st.session_state['sugestoes'])
+    if 'email_final' in st.session_state and st.session_state['email_final']:
+        st.markdown("#### 📧 E-mail Gerado:")
+        st.text_area("Resultado:", value=st.session_state['email_final'], height=350, disabled=True)
 
-                pdf_bytes = gerar_pdf(st.session_state['email_final'])
-                txt_bytes = st.session_state['email_final'].encode('utf-8')
+        if aba == "✏️ Melhorar rascunho":
+            st.markdown("#### 💡 Sugestões:")
+            st.markdown(st.session_state['sugestoes'])
 
-                st.download_button(
-                    label="⬇️ Baixar e-mail revisado (.txt)",
-                    data=txt_bytes,
-                    file_name=f"email_revisado_{datetime.now().strftime('%Y%m%d_%H%M%S')}.txt",
-                    mime="text/plain"
-                )
+        pdf_bytes = gerar_pdf(st.session_state['email_final'])
+        txt_bytes = st.session_state['email_final'].encode('utf-8')
 
-                st.download_button(
-                    label="⬇️ Baixar e-mail revisado (.pdf)",
-                    data=pdf_bytes,
-                    file_name=f"email_revisado_{datetime.now().strftime('%Y%m%d_%H%M%S')}.pdf",
-                    mime="application/pdf"
-                )
+        st.download_button(
+            label="⬇️ Baixar e-mail (.txt)",
+            data=txt_bytes,
+            file_name=f"email_{datetime.now().strftime('%Y%m%d_%H%M%S')}.txt",
+            mime="text/plain"
+        )
 
+        st.download_button(
+            label="⬇️ Baixar e-mail (.pdf)",
+            data=pdf_bytes,
+            file_name=f"email_{datetime.now().strftime('%Y%m%d_%H%M%S')}.pdf",
+            mime="application/pdf"
+        )
 
 st.markdown("---")
 st.markdown(

@@ -8,6 +8,8 @@ Uma ferramenta web desenvolvida com **Python**, **Streamlit** e **Google Gemini 
 - **Integração com Gemini AI**: Usa inteligência artificial avançada para revisão de texto.
 - **Múltiplos tons**: Escolha entre formal, amigável ou assertivo.
 - **Idioma**: Escolha entre Português, Inglês ou Espanhol.
+- **Baixar o email revisado**: Baixar arquivo .txt ou .pdf.
+- **Gerar revisão de email ou por objetivo**: Poder de escolha entre enviar um e-mail ou enviar palavras chaves/objetivo.
 - **Correções automáticas**: Substitui abreviações informais por termos profissionais.
 - **Sugestões detalhadas**: Explica todas as melhorias aplicadas.
 - **Interface responsiva**: Funciona bem em desktop e mobile.
