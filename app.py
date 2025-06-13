@@ -91,8 +91,12 @@ def processar_email_com_gemini(rascunho, tom, idioma):
         api_key = st.secrets["API_KEY"]
         genai.configure(api_key=api_key)
         modelo = genai.GenerativeModel('gemini-1.5-flash')
-
-        prompt = gerar_prompt_melhoria_email(rascunho, tom, idioma)
+        
+        if aba == "✏️ Melhorar rascunho":
+            prompt = gerar_prompt_melhoria_email(rascunho, tom, idioma)
+        else:
+            prompt = gerar_prompt_por_objetivo(rascunho, tom, idioma)
+        
         resposta = modelo.generate_content(prompt)
         return resposta.text
 
@@ -138,6 +142,13 @@ def gerar_pdf(texto):
     return pdf_bytes
 
 aba = st.radio("Escolha o modo:", ["✏️ Melhorar rascunho", "🧠 Gerar por objetivo"], horizontal=True)
+
+if 'ultima_aba' not in st.session_state:
+    st.session_state['ultima_aba'] = aba
+elif st.session_state['ultima_aba'] != aba:
+    st.session_state['email_final'] = ""
+    st.session_state['sugestoes'] = ""
+    st.session_state['ultima_aba'] = aba
 
 col1, col2 = st.columns([1, 1])
 
@@ -204,15 +215,10 @@ with col2:
             st.info("👈 Descreva o objetivo do e-mail para ver o resultado")
         elif botao_processar:
             with st.spinner("Gerando e-mail..."):
-                try:
-                    api_key = st.secrets["API_KEY"]
-                    genai.configure(api_key=api_key)
-                    modelo = genai.GenerativeModel('gemini-1.5-flash')
-
-                    prompt = gerar_prompt_por_objetivo(objetivo_email, tom, idioma)
-                    resposta = modelo.generate_content(prompt)
-                    texto = resposta.text
+                try:                    
+                    texto = processar_email_com_gemini(objetivo_email, tom, idioma)
                     email_final = texto.split("**E-MAIL GERADO:**")[-1].strip()
+
                     st.session_state['email_final'] = email_final
                     st.session_state['sugestoes'] = "ℹ️ Gerado diretamente a partir do objetivo informado."
                     st.success("✅ E-mail gerado com sucesso!")

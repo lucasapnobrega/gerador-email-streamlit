@@ -28,6 +28,7 @@ email_consultant_streamlit/
 - **streamlit**: Framework para interface web
 - **google-generativeai**: SDK oficial do Google Gemini AI
 - **python-dotenv**: Gerenciamento de variáveis de ambiente
+- **fpdf**: Download de PDF.
 
 ## 💡 Exemplos de uso
 
