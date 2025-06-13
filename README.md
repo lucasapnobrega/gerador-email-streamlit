@@ -46,6 +46,11 @@ Você poderia me enviar o relatório? Agradeço antecipadamente, pois preciso de
 Atenciosamente,
 ```
 
+## Equipe
+- Lucas Alcântara Pinho da Nóbrega - RGM: 29319161
+- Tiago Monteiro Simões Cavalcante - RGM: 31638228
+- Victor Medeiros Cavalcante - RGM: 30004772
+
 ## 🎯 Desenvolvido com
 
 - **Python 3.11**
