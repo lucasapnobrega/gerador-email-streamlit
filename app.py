@@ -2,6 +2,9 @@ import streamlit as st
 import google.generativeai as genai
 import os
 from dotenv import load_dotenv
+import io
+from fpdf import FPDF
+from datetime import datetime
 
 load_dotenv()
 
@@ -11,11 +14,17 @@ st.set_page_config(
     layout="wide"
 )
 
-def gerar_prompt_melhoria_email(rascunho, tom):    
+def gerar_prompt_melhoria_email(rascunho, tom, idioma):    
     instrucoes_tom = {
         "formal": "Use linguagem formal, tratamento respeitoso, evite contrações e gírias. Adicione cumprimentos e fechamentos apropriados para contexto corporativo.",
         "amigável": "Use linguagem calorosa e acessível, mas mantenha profissionalismo. Pode usar contrações moderadas e tom mais pessoal.",
         "assertivo": "Use linguagem direta, confiante e objetiva. Evite hesitações e seja claro nas solicitações."
+    }
+
+    instrucoes_idioma = {
+        "português": "Responda inteiramente em português.",
+        "inglês": "Respond entirely in English.",
+        "espanhol": "Redacta absolutamente todo en español, sin ninguna palabra en portugués o inglés. Esto incluye encabezados, explicaciones y todo el contenido del correo."
     }
     
     prompt = f"""
@@ -30,6 +39,7 @@ def gerar_prompt_melhoria_email(rascunho, tom):
         3. Melhore a clareza e estrutura do texto
         4. Substitua abreviações informais por termos profissionais (ex: vc → você, obg → obrigado)
         5. Adicione cumprimentos e fechamentos apropriados se necessário
+        6. {instrucoes_idioma[idioma]}
 
         FORMATO DA RESPOSTA:
         Forneça sua resposta em duas seções claramente separadas:
@@ -42,13 +52,13 @@ def gerar_prompt_melhoria_email(rascunho, tom):
     """
     return prompt
 
-def processar_email_com_gemini(rascunho, tom):
+def processar_email_com_gemini(rascunho, tom, idioma):
     try:
         api_key = st.secrets["API_KEY"]
         genai.configure(api_key=api_key)
         modelo = genai.GenerativeModel('gemini-1.5-flash')
 
-        prompt = gerar_prompt_melhoria_email(rascunho, tom)
+        prompt = gerar_prompt_melhoria_email(rascunho, tom, idioma)
         resposta = modelo.generate_content(prompt)
         return resposta.text
 
@@ -57,20 +67,44 @@ def processar_email_com_gemini(rascunho, tom):
 
 def extrair_resposta_gemini(texto_resposta):
     try:
-        partes = texto_resposta.split("**SUGESTÕES E EXPLICAÇÕES:**")
+        separadores = [
+            "**SUGESTÕES E EXPLICAÇÕES:**",
+            "**SUGGESTIONS AND EXPLANATIONS:**",
+            "**SUGERENCIAS Y EXPLICACIONES:**"
+        ]
 
-        if len(partes) == 2:
-            email_revisado = partes[0].replace("**E-MAIL REVISADO:**", "").strip()
-            sugestoes = partes[1].strip()
-            return email_revisado, sugestoes
-        else:
-            return texto_resposta, "❗ Não foi possível separar as sugestões."
-            
+        for separador in separadores:
+            if separador in texto_resposta:
+                partes = texto_resposta.split(separador)
+                if len(partes) == 2:
+                    email_revisado = partes[0].replace("**E-MAIL REVISADO:**", "").replace("**REVISED EMAIL:**", "").strip()
+                    sugestoes = partes[1].strip()
+
+                    return email_revisado, sugestoes
+
+        return texto_resposta, "❗ Não foi possível separar as sugestões."
+
     except Exception as erro:
         return texto_resposta, f"Erro ao interpretar resposta: {str(erro)}"
 
 st.markdown("<h1 style='text-align: center;'>📧 Consultor de E-mails Profissionais</h1>", unsafe_allow_html=True)
 st.markdown("---")
+
+email_final = ""
+
+def gerar_pdf(texto):
+    pdf = FPDF()
+    pdf.add_page()
+    pdf.set_auto_page_break(auto=True, margin=15)
+    pdf.set_font("Arial", size=12)
+
+    linhas = texto.split('\n')
+    for linha in linhas:
+        pdf.multi_cell(0, 10, linha)
+
+    pdf_bytes = pdf.output(dest='S').encode('latin1')
+
+    return pdf_bytes
 
 col1, col2 = st.columns([1, 1])
 
@@ -92,6 +126,16 @@ with col1:
         }[x]
     )
 
+    idioma = st.selectbox(
+        "Escolha o idioma de saída:",
+        ["português", "inglês", "espanhol"],
+        format_func=lambda x: {
+            "português": "🇧🇷 Português (padrão)",
+            "inglês": "🇺🇸 Inglês",
+            "espanhol": "🇪🇸 Espanhol"
+        }[x],
+    )
+
     botao_processar = st.button(
         "🔄 Revisar e Aperfeiçoar",
         type="primary",
@@ -99,32 +143,54 @@ with col1:
     )
 
 with col2:
-    st.markdown("### ✨ Resultado")
+    st.markdown("### Resultado")
 
     if not rascunho_email.strip():
         st.info("👈 Digite seu rascunho de e-mail para ver o resultado")
     else:
         if botao_processar:
-            with st.spinner("🤖 Processando seu texto..."):
+            with st.spinner("Processando seu texto..."):
                 try:
-                    resposta = processar_email_com_gemini(rascunho_email, tom)
+                    resposta = processar_email_com_gemini(rascunho_email, tom, idioma)
                     email_final, sugestoes = extrair_resposta_gemini(resposta)
+
+                    st.session_state['email_final'] = email_final
+                    st.session_state['sugestoes'] = sugestoes
 
                     st.success("✅ E-mail processado com sucesso!")
 
-                    st.markdown("#### 📧 E-mail Revisado:")
-                    st.text_area(
-                        "Resultado:",
-                        value=email_final,
-                        height=350,
-                        disabled=True
-                    )
-
-                    st.markdown("#### 💡 Sugestões de Melhoria:")
-                    st.markdown(sugestoes)
-
                 except Exception as erro:
                     st.error(f"❌ Erro ao processar: {str(erro)}")
+
+        if 'email_final' in st.session_state and st.session_state['email_final']:
+                st.markdown("#### 📧 E-mail Revisado:")
+                st.text_area(
+                    "Resultado:",
+                    value=st.session_state['email_final'],
+                    height=350,
+                    disabled=True
+                )
+
+                st.markdown("#### 💡 Sugestões de Melhoria:")
+                st.markdown(st.session_state['sugestoes'])
+
+                pdf_bytes = gerar_pdf(st.session_state['email_final'])
+                txt_bytes = st.session_state['email_final'].encode('utf-8')
+
+                st.download_button(
+                    label="⬇️ Baixar e-mail revisado (.txt)",
+                    data=txt_bytes,
+                    file_name=f"email_revisado_{datetime.now().strftime('%Y%m%d_%H%M%S')}.txt",
+                    mime="text/plain"
+                )
+
+                st.download_button(
+                    label="⬇️ Baixar e-mail revisado (.pdf)",
+                    data=pdf_bytes,
+                    file_name=f"email_revisado_{datetime.now().strftime('%Y%m%d_%H%M%S')}.pdf",
+                    mime="application/pdf"
+                )
+
 
 st.markdown("---")
 st.markdown(
