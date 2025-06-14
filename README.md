@@ -1,10 +1,5 @@
 # Consultor de E-mails Profissionais
 
-## Equipe
-- Lucas Alcântara Pinho da Nóbrega - RGM: 29319161
-- Tiago Monteiro Simões Cavalcante - RGM: 31638228
-- Victor Medeiros Cavalcante - RGM: 30004772
-
 Uma ferramenta web desenvolvida com **Python**, **Streamlit** e **Google Gemini AI** que transforma rascunhos de e-mail em versões profissionais, claras e objetivas.
 
 ## 🚀 Funcionalidades
@@ -18,6 +13,11 @@ Uma ferramenta web desenvolvida com **Python**, **Streamlit** e **Google Gemini 
 - **Correções automáticas**: Substitui abreviações informais por termos profissionais.
 - **Sugestões detalhadas**: Explica todas as melhorias aplicadas.
 - **Interface responsiva**: Funciona bem em desktop e mobile.
+
+## 👥 Equipe
+- Lucas Alcântara Pinho da Nóbrega - RGM: 29319161
+- Tiago Monteiro Simões Cavalcante - RGM: 31638228
+- Victor Medeiros Cavalcante - RGM: 30004772
 
 ## 📁 Estrutura do projeto
 
