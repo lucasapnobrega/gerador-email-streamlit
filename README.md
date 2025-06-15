@@ -44,11 +44,17 @@ oi, vc pode me mandar o relatório? obg, preciso dele pra reunião de amanhã
 
 ### Saída (formal):
 ```
-Prezado(a),
+Prezado(a) [Nome do destinatário],
 
-Você poderia me enviar o relatório? Agradeço antecipadamente, pois preciso dele para a reunião de amanhã.
+Espero que esteja bem.
+
+Escrevo para solicitar o envio do relatório o mais breve possível. Necessito dele para a reunião que se realizará amanhã.
+
+Agradeço antecipadamente a sua atenção e colaboração.
 
 Atenciosamente,
+
+[Seu Nome]
 ```
 
 ## 🎯 Desenvolvido com
@@ -56,8 +62,4 @@ Atenciosamente,
 - **Python 3.11**
 - **Streamlit 1.28.1**
 - **Google Gemini AI**
-
----
-
-**Nota**: Esta ferramenta requer uma chave da API do Google Gemini AI para funcionar.
 
